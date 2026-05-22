@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+packages/db/.env
+packages/db/.env.supabase.local
+apps/web/.env.supabase.local
+apps/web/.env.vercel.production
+scripts/.cron-secret.txt
+.vercel
+apps/web/.vercel
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Prisma
+packages/db/prisma/migrations/**/migration_lock.toml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Docker
+.docker/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Turbo
+.turbo/
+
+# Generated thumbnails (local dev)
+apps/web/public/generated/

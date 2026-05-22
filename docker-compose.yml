@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: thumbnailflow-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: thumbnailflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: thumbnailflow-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  trend-engine:
+    build: ./services/trend-engine
+    container_name: thumbnailflow-trend-engine
+    ports:
+      - "8001:8001"
+    environment:
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001
+
+  thumbnail-engine:
+    build: ./services/thumbnail-engine
+    container_name: thumbnailflow-thumbnail-engine
+    ports:
+      - "8002:8002"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    container_name: thumbnailflow-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/thumbnailflow?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@postgres:5432/thumbnailflow?schema=public
+      REDIS_URL: redis://redis:6379
+      TREND_ENGINE_URL: http://trend-engine:8001
+      THUMBNAIL_ENGINE_URL: http://thumbnail-engine:8002
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+    depends_on:
+      - postgres
+      - redis
+      - trend-engine
+      - thumbnail-engine
+
+volumes:
+  postgres_data:
+  redis_data:

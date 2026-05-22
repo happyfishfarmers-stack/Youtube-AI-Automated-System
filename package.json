@@ -1,0 +1,31 @@
+{
+  "name": "thumbnailflow-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ThumbnailFlow AI — YouTube thumbnail automation SaaS",
+  "workspaces": [
+    "apps/web",
+    "packages/db",
+    "packages/queue"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @thumbnailflow/web",
+    "worker": "npm run worker -w @thumbnailflow/web",
+    "worker:dev": "npm run worker:dev -w @thumbnailflow/web",
+    "start:all": "powershell -ExecutionPolicy Bypass -File scripts/start-all.ps1",
+    "stop:web": "powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }\"",
+    "dev:trends": "cd services/trend-engine && python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8001",
+    "dev:thumbnails": "cd services/thumbnail-engine && python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8002",
+    "build": "npm run build -w @thumbnailflow/web",
+    "lint": "npm run lint -w @thumbnailflow/web",
+    "db:generate": "npm run generate -w @thumbnailflow/db",
+    "db:push": "npm run push -w @thumbnailflow/db",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "vercel:prepare": "powershell -ExecutionPolicy Bypass -File scripts/prepare-vercel-env.ps1",
+    "vercel:deploy": "npx vercel --cwd apps/web --prod"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
